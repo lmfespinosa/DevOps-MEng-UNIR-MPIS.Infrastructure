@@ -1,0 +1,183 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+- group: COMMON
+
+stages:
+
+
+- stage: Build
+  displayName: Main stage
+
+  jobs:
+  - job: Build
+    displayName: Create Azure resources for Terraform
+
+    steps:
+    - task: AzureCLI@2
+      displayName: Create Azure resources for Terraform
+      inputs:
+        azureSubscription: $(AZURE_SERVICE_CONNECTION)
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: |
+          az extension add --name azure-devops
+          # create resource group
+     
+          echo "creating resource group"
+          az group create --location $(TERRAFORM_LOCATION) --name $(TERRAFORM_RESOURCE_GROUP)
+     
+          # create storage account
+     
+          echo "creating storage account"
+          az storage account create --name $(TERRAFORM_STORAGE_ACCOUNT) --resource-group $(TERRAFORM_RESOURCE_GROUP) --location $(TERRAFORM_LOCATION) --sku Standard_LRS --default-action allow
+     
+          # create storage container
+     
+          echo "creating storage container"
+          Set-Variable -Name "STORAGE_KEY" -Value ""
+          $STORAGE_KEY=$(az storage account keys list --resource-group $(TERRAFORM_RESOURCE_GROUP) --account-name $(TERRAFORM_STORAGE_ACCOUNT) --query "[0].value" --output tsv)
+          echo $STORAGE_KEY
+          az storage container create --name $(TERRAFORM_STORAGE_CONTAINER) --account-name $(TERRAFORM_STORAGE_ACCOUNT) --account-key $STORAGE_KEY
+
+          az storage account keys list -g $(TERRAFORM_RESOURCE_GROUP) -n $(TERRAFORM_STORAGE_ACCOUNT)
+
+          #echo "az storage container create --name $(TERRAFORM_STORAGE_CONTAINER) --account-name $(TERRAFORM_STORAGE_ACCOUNT)"
+          # echo $(PAT_PORTAL) | az login
+          #az storage container create --name $(TERRAFORM_STORAGE_CONTAINER) --account-name $(TERRAFORM_STORAGE_ACCOUNT) 
+
+    - task: AzurePowerShell@3
+      displayName: 'Capture Azure Storage Key'
+      inputs:
+        azureSubscription: $(AZURE_SERVICE_CONNECTION)
+        ScriptType: InlineScript
+        Inline: |
+          $key = (Get-AzureRmStorageAccountKey -ResourceGroupName $(TERRAFORM_RESOURCE_GROUP) -AccountName $(TERRAFORM_STORAGE_ACCOUNT)).Value[0]
+     
+          Write-Host "##vso[task.setvariable variable=terraformstoragekey]$key"
+        preferredAzurePowerShellVersion: 2.1.0
+
+    - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+      displayName: 'Replace tokens in **/*.tf'
+      inputs:
+        targetFiles: '**/*.tf'
+        verbosity: detailed
+        actionOnMissing: fail
+        tokenPrefix: '__'
+        tokenSuffix: '__'
+
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+      displayName: 'Install Terraform 0.12.29'
+      inputs:
+        terraformVersion: 0.12.29
+
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+      displayName: 'Terraform : init'
+      inputs:
+        workingDirectory: '$(System.DefaultWorkingDirectory)/src/'
+        backendServiceArm: '$(AZURE_SERVICE_CONNECTION)'
+        backendAzureRmResourceGroupName: '$(TERRAFORM_RESOURCE_GROUP)'
+        backendAzureRmStorageAccountName: '$(TERRAFORM_STORAGE_ACCOUNT)'
+        backendAzureRmContainerName: '$(TERRAFORM_STORAGE_CONTAINER)'
+        backendAzureRmKey: '$(ENVIRONMENT)_$(TERRAFORM_STATE_FILE)'
+
+
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+      displayName: 'Terraform : plan'
+      inputs:
+        command: plan
+        workingDirectory: '$(System.DefaultWorkingDirectory)/src/'
+        commandOptions: '-lock=false -no-color -var environment=$(ENVIRONMENT)'
+        environmentServiceNameAzureRM: '$(AZURE_SERVICE_CONNECTION)'
+
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+      displayName: 'Terraform : validate & apply'
+      inputs:
+        command: apply
+        workingDirectory: '$(System.DefaultWorkingDirectory)/src/'
+        commandOptions: '-auto-approve -no-color -lock=false -var environment=$(ENVIRONMENT)'
+        environmentServiceNameAzureRM: '$(AZURE_SERVICE_CONNECTION)'
+
+
+
+#- task: AzurePowerShell@3
+#  displayName: 'Capture Azure Storage Key'
+#  inputs:
+#    azureSubscription: $(AZURE_SUBSCRIPTION)
+#    ScriptType: InlineScript
+#    Inline: |
+#     $key = (Get-AzureRmStorageAccountKey -ResourceGroupName $(TERRAFORM_RESOURCE_GROUP) -AccountName $(TERRAFORM_STORAGE_ACCOUNT)).Value[0]
+#     
+#     Write-Host "##vso[task.setvariable variable=terraformstoragekey]$key"
+#    preferredAzurePowerShellVersion: 2.1.0
+
+#steps:
+#- script: |
+#    az extension remove --name azure-devops
+#    az extension add --name azure-devops
+
+#    echo "$(PAT_PORTAL) | az login"
+#    echo $(PAT_PORTAL) | az login 
+    
+# create resource group
+
+#    echo "creating resource group"
+#    az group create --location $(TERRAFORM_LOCATION) --name $(TERRAFORM_RESOURCE_GROUP)
+
+# create storage account
+
+#   echo "creating storage account"
+#    az storage account create --name $(TERRAFORM_STORAGE_ACCOUNT) --resource-group $(TERRAFORM_RESOURCE_GROUP) --location $(TERRAFORM_LOCATION) --sku Standard_LRS
+
+#    # create storage container
+
+#    echo "creating storage container"
+#    az storage container create --name $(TERRAFORM_STORAGE_CONTAINER) --account-name $(TERRAFORM_STORAGE_ACCOUNT) 
+#  displayName: 'Create Azure resources for Terraform'
+
+#- script: |
+#    $key = (Get-AzureRmStorageAccountKey -ResourceGroupName $(TERRAFORM_RESOURCE_GROUP) -AccountName $(TERRAFORM_STORAGE_ACCOUNT)).Value[0]
+
+#    Write-Host "##vso[task.setvariable variable=terraformstoragekey]$key"
+#  displayName: 'Capture Azure Storage Key'
+
+#- task: qetza.replacetokens.replacetokens-task.replacetokens@3
+#  displayName: 'Replace tokens'
+#  inputs:
+#    targetFiles: |
+#      **/*.tf
+#      **/*.tf => outputs/*.tf
+#    tokenPrefix: '__'
+#    tokenSuffix: '__' 
+
+#- task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+#  displayName: 'Use Terraform 0.12.28'
+#  inputs:
+#    terraformVersion: 0.12.28
+
+#- task: DownloadSecureFile@1
+#  displayName: 'Download secure file'
+#  inputs:
+#    secureFile: 'terraform.tfvars'
+
+#- task: CopyFiles@2
+#  displayName: 'Copy Files to: $(Build.SourcesDirectory)'
+#  inputs:
+#    sourceFolder: $(Agent.TempDirectory)
+#    targetFolder: $(Build.SourcesDirectory)
+
+#- script: 'terraform init'
+#  displayName: 'Terraform init'
+
+#- script: 'terraform apply -auto-approve -no-color -lock=false'
+#  displayName: 'Terraform apply'
+
+#- task: DeleteFiles@1
+#  displayName: 'Delete files from $(Build.SourcesDirectory)'
+#  inputs:
+#    SourceFolder: '$(Build.SourcesDirectory)'
+#    Contents: '**'
