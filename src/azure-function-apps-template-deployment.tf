@@ -82,7 +82,11 @@ resource "azurerm_template_deployment" "function_keys_test" {
 }
 
 output "func_keys" {
-  value = "${lookup(azurerm_template_deployment.function_keys.outputs, "functionkey")}"
+  value = "${lookup(azurerm_template_deployment.function_keys[0].outputs, "functionkey")}"
+}
+
+output "func_keys_text" {
+  value = "${lookup(azurerm_template_deployment.function_keys_test[0].outputs, "functionkey")}"
 }
 
 #resource "azurerm_template_deployment" "function_keys_slot" {  
