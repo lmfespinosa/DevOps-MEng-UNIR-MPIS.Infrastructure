@@ -10,8 +10,7 @@ resource "azuredevops_variable_group" "variablegroup" {
   description                         = "Terraform managed resources for ${upper(var.environment)} environment. Don't modify any value yourself!"
   allow_access                         = true
 
-  depends_on                          = [azurerm_template_deployment.function_keys,azurerm_template_deployment.function_keys_test, azurerm_eventgrid_topic.topic,azurerm_eventgrid_topic.topic_test,azurerm_sql_server.sqlserver]
-
+  depends_on                          = [azurerm_template_deployment.function_keys,azurerm_template_deployment.function_keys_test, azurerm_eventgrid_topic.topic_user,azurerm_eventgrid_topic.topic_user_test,azurerm_sql_server.sqlserver,azurerm_eventgrid_topic.topic_device,azurerm_eventgrid_topic.topic_device_test]
 
 
   # ------------------------------------------------------------------------------------

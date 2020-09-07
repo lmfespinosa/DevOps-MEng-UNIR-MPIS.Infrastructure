@@ -16,6 +16,9 @@ resource "azurerm_eventgrid_topic" "topic_user" {
    resource_group_name                 = azurerm_resource_group.resourcegroup.name
    location                            = var.azure_location
    tags                                = merge(var.azure_common_tags, {"service" = "event-grid-topic" })
+   input_mapping_fields = {
+       topic = "user"
+   }
  }
 
  resource "azurerm_eventgrid_topic" "topic_user_test" {
@@ -23,6 +26,9 @@ resource "azurerm_eventgrid_topic" "topic_user" {
    resource_group_name                 = azurerm_resource_group.resourcegroup.name
   location                            = var.azure_location
   tags                                = merge(var.azure_common_tags, {"service" = "event-grid-topic" })
+  input_mapping_fields = {
+       topic = "user"
+   }
 }
 
 resource "azurerm_eventgrid_topic" "topic_device" {
@@ -30,6 +36,9 @@ resource "azurerm_eventgrid_topic" "topic_device" {
    resource_group_name                 = azurerm_resource_group.resourcegroup.name
    location                            = var.azure_location
    tags                                = merge(var.azure_common_tags, {"service" = "event-grid-topic" })
+   input_mapping_fields = {
+       topic = "device"
+   }
  }
 
  resource "azurerm_eventgrid_topic" "topic_device_test" {
@@ -37,4 +46,7 @@ resource "azurerm_eventgrid_topic" "topic_device" {
    resource_group_name                 = azurerm_resource_group.resourcegroup.name
   location                            = var.azure_location
   tags                                = merge(var.azure_common_tags, {"service" = "event-grid-topic" })
+  input_mapping_fields = {
+       topic = "device"
+   }
 }
