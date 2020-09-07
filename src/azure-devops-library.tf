@@ -168,40 +168,40 @@ resource "azuredevops_variable_group" "variablegroup" {
   # Event grid
   # ------------------------------------------------------------------------------------
 
-  # 0
+  # 0 user
 
   variable {
-    name                              = "EVENT_GRID_${upper(var.topics[0])}_TOPIC_ID_${upper(var.environment)}"
-    value                             = azurerm_eventgrid_topic.topic[0].id
+    name                              = "EVENT_GRID_USER_TOPIC_ID_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_user.id
   }
 
 
   variable {
-    name                              = "EVENT_GRID_${upper(var.topics[0])}_TOPIC_ENDPOINT_${upper(var.environment)}"
-    value                             = azurerm_eventgrid_topic.topic[0].endpoint
+    name                              = "EVENT_GRID_USER_TOPIC_ENDPOINT_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_user.endpoint
   }
 
   variable {
-    name                              = "EVENT_GRID_${upper(var.topics[0])}_TOPIC_PRIMARY_KEY_${upper(var.environment)}"
-    value                             = azurerm_eventgrid_topic.topic[0].primary_access_key
+    name                              = "EVENT_GRID_USER_TOPIC_PRIMARY_KEY_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_user.primary_access_key
     # is_secret                         = true
   } 
 
- #1
+ #1 device
  variable {
-   name                              = "EVENT_GRID_${upper(var.topics[1])}_TOPIC_ID_${upper(var.environment)}"
-    value                             = azurerm_eventgrid_topic.topic[1].id
+   name                              = "EVENT_GRID_DEVICE_TOPIC_ID_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_device.id
   }
 
 
   variable {
-    name                              = "EVENT_GRID_${upper(var.topics[1])}_TOPIC_ENDPOINT_${upper(var.environment)}"
-    value                             = azurerm_eventgrid_topic.topic[1].endpoint
+    name                              = "EVENT_GRID_DEVICE_TOPIC_ENDPOINT_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_device.endpoint
   }
 
   variable {
-    name                              = "EVENT_GRID_${upper(var.topics[1])}_TOPIC_PRIMARY_KEY_${upper(var.environment)}"
-    value                             = azurerm_eventgrid_topic.topic[1].primary_access_key
+    name                              = "EVENT_GRID_DEVICE_TOPIC_PRIMARY_KEY_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_device.primary_access_key
     # is_secret                         = true
   } 
 
