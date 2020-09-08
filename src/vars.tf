@@ -27,6 +27,11 @@ variable "azure_common_tags" {
     }
 }
 
+variable "pat_devops" {
+    type            = string
+    default         = "__personalaccesstoken__"
+}
+
 # Random string
 # https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string
 
