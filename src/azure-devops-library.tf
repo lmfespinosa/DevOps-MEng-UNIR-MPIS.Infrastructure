@@ -183,13 +183,13 @@ resource "azuredevops_variable_group" "variablegroup" {
   }
 
   variable {
-     name                              = "FUNCTION_TEST_${upper(var.functionapptest[0])}_MASTER_KEY_${upper(var.environment)}"
+     name                              = "FUNCTION_TEST_${upper(var.functionapps[0])}_MASTER_KEY_${upper(var.environment)}"
      value                             = lookup(azurerm_template_deployment.function_keys_test[0].outputs, "functionkey")
      # is_secret                         = true
    }
 
    variable {
-     name                              = "FUNCTION_${upper(var.functionapps[0])}_KEY_PATH_${upper(var.environment)}"
+     name                              = "FUNCTION_TEST_${upper(var.functionapps[0])}_KEY_PATH_${upper(var.environment)}"
      value                             = "key=${lookup(azurerm_template_deployment.function_keys_test[0].outputs, "functionkey")};path=https://${azurerm_function_app.functionapptest[0].default_hostname}"
      # is_secret                         = true
    }
