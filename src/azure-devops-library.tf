@@ -168,6 +168,57 @@ resource "azuredevops_variable_group" "variablegroup" {
    }
 
   # ------------------------------------------------------------------------------------
+  # Function app Test (name, hostname, master key, and "key/path" combination)
+  # ------------------------------------------------------------------------------------
+
+  # 0
+  variable {
+    name                              = "FUNCTION_TEST_${upper(var.functionapps[0])}_HOSTNAME_${upper(var.environment)}"
+    value                             = "https://${azurerm_function_app.functionapptest[0].default_hostname}"
+  }
+
+  variable {
+    name                              = "FUNCTION_TEST_${upper(var.functionapps[0])}_NAME_${upper(var.environment)}"
+    value                             = azurerm_function_app.functionapptest[0].name
+  }
+
+  variable {
+     name                              = "FUNCTION_TEST_${upper(var.functionappstest[0])}_MASTER_KEY_${upper(var.environment)}"
+     value                             = lookup(azurerm_template_deployment.function_keys_test[0].outputs, "functionkey")
+     # is_secret                         = true
+   }
+
+   variable {
+     name                              = "FUNCTION_${upper(var.functionapps[0])}_KEY_PATH_${upper(var.environment)}"
+     value                             = "key=${lookup(azurerm_template_deployment.function_keys_test[0].outputs, "functionkey")};path=https://${azurerm_function_app.functionapptest[0].default_hostname}"
+     # is_secret                         = true
+   }
+
+
+  # 1
+  variable {
+    name                              = "FUNCTION_TEST_${upper(var.functionapps[1])}_HOSTNAME_${upper(var.environment)}"
+    value                             = "https://${azurerm_function_app.functionapptest[1].default_hostname}"
+  }
+
+  variable {
+    name                              = "FUNCTION_TEST_${upper(var.functionapps[1])}_NAME_${upper(var.environment)}"
+    value                             = azurerm_function_app.functionapptest[1].name
+  }  
+
+   variable {
+     name                              = "FUNCTION_TEST_${upper(var.functionapps[1])}_MASTER_KEY_${upper(var.environment)}"
+     value                             = lookup(azurerm_template_deployment.function_keys_test[1].outputs, "functionkey")
+     # is_secret                         = true
+   }
+
+   variable {
+     name                              = "FUNCTION_TEST_${upper(var.functionapps[1])}_KEY_PATH_${upper(var.environment)}"
+     value                             = "key=${lookup(azurerm_template_deployment.function_keys_test[1].outputs, "functionkey")};path=https://${azurerm_function_app.functionapptest[1].default_hostname}"
+     # is_secret                         = true
+   }
+
+  # ------------------------------------------------------------------------------------
   # Event grid
   # ------------------------------------------------------------------------------------
 
@@ -205,6 +256,47 @@ resource "azuredevops_variable_group" "variablegroup" {
   variable {
     name                              = "EVENT_GRID_${upper(var.topics[1])}_TOPIC_PRIMARY_KEY_${upper(var.environment)}"
     value                             = azurerm_eventgrid_topic.topic[1].primary_access_key
+    # is_secret                         = true
+  } 
+
+  # ------------------------------------------------------------------------------------
+  # Event grid Test
+  # ------------------------------------------------------------------------------------
+
+  # 0 user
+
+  variable {
+    name                              = "EVENT_GRID_TEST_${upper(var.topics[0])}_TOPIC_ID_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_test[0].id
+  }
+
+
+  variable {
+    name                              = "EVENT_GRID_TEST_${upper(var.topics[0])}_TOPIC_ENDPOINT_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_test[0].endpoint
+  }
+
+  variable {
+    name                              = "EVENT_GRID_TEST_${upper(var.topics[0])}_TOPIC_PRIMARY_KEY_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_test[0].primary_access_key
+    # is_secret                         = true
+  } 
+
+ #1 device
+ variable {
+   name                              = "EVENT_GRID_TEST_${upper(var.topics[1])}_TOPIC_ID_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_test[1].id
+  }
+
+
+  variable {
+    name                              = "EVENT_GRID_TEST_${upper(var.topics[1])}_TOPIC_ENDPOINT_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_test[1].endpoint
+  }
+
+  variable {
+    name                              = "EVENT_GRID_TEST_${upper(var.topics[1])}_TOPIC_PRIMARY_KEY_${upper(var.environment)}"
+    value                             = azurerm_eventgrid_topic.topic_test[1].primary_access_key
     # is_secret                         = true
   } 
 
