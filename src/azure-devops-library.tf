@@ -183,7 +183,7 @@ resource "azuredevops_variable_group" "variablegroup" {
   }
 
   variable {
-     name                              = "FUNCTION_TEST_${upper(var.functionappstest[0])}_MASTER_KEY_${upper(var.environment)}"
+     name                              = "FUNCTION_TEST_${upper(var.functionapptest[0])}_MASTER_KEY_${upper(var.environment)}"
      value                             = lookup(azurerm_template_deployment.function_keys_test[0].outputs, "functionkey")
      # is_secret                         = true
    }
